@@ -77,15 +77,16 @@ echo ""
 download_file \
   "$DOWNLOAD_BASE/Server/HytaleServer.jar" \
   "Server/HytaleServer.jar" \
-  "$(get_sha HytaleServer.jar)"
+  "$(get_sha 'Server/HytaleServer.jar')"
 echo ""
+
 
 # Download HytaleServer.aot (optional)
 if [ "$USE_AOT_CACHE" = "1" ]; then
     download_file \
       "$DOWNLOAD_BASE/Server/HytaleServer.aot" \
       "Server/HytaleServer.aot" \
-      "$(get_sha HytaleServer.aot)"
+      "$(get_sha 'Server/HytaleServer.aot')"
     echo ""
 fi
 
@@ -93,7 +94,7 @@ fi
 download_file \
   "$DOWNLOAD_BASE/Assets.zip" \
   "Assets.zip" \
-  "$(get_sha Assets.zip)"
+  "$(get_sha 'Assets.zip')"
 echo ""
 
 # Clean up manifest
