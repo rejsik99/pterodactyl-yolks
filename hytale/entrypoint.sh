@@ -44,7 +44,8 @@ download_file() {
         echo "$(basename "$target_path") not found, downloading"
     fi
 
-    curl -# -L -f "$url" -o "${target_path}.tmp"
+    # Add -k to ignore SSL verification
+    curl -k -# -L -f "$url" -o "${target_path}.tmp"
 
     DOWNLOADED_SHA256=$(sha256sum "${target_path}.tmp" | awk '{print $1}')
     if [ "$DOWNLOADED_SHA256" != "$expected_sha256" ]; then
@@ -56,9 +57,10 @@ download_file() {
     mv "${target_path}.tmp" "$target_path"
 }
 
+
 # Fetch manifest
 echo "Fetching manifest..."
-curl -sSL -f "$MANIFEST_URL" -o manifest.json
+curl -k -# -sSL -f "$MANIFEST_URL" -o manifest.json
 
 LATEST_VERSION=$(jq -r '.latest_version' manifest.json)
 VERSION_OBJ=$(jq -r '.versions[] | select(.version == "'$LATEST_VERSION'")' manifest.json)
