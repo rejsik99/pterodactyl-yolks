@@ -13,9 +13,9 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 25": "ghcr.io/blstmo/pterodactyl-yolks:hytale_25",
-        "Java 24": "ghcr.io/blstmo/pterodactyl-yolks:hytale_24",
-        "Java 21": "ghcr.io/blstmo/pterodactyl-yolks:hytale_21"
+        "Java 25": "ghcr.io/rejsik99/pterodactyl-yolks:hytale_25",
+        "Java 24": "ghcr.io/rejsik99/pterodactyl-yolks:hytale_24",
+        "Java 21": "ghcr.io/rejsik99/pterodactyl-yolks:hytale_21"
     },
     "file_denylist": [],
     "startup": "java $( ((USE_AOT_CACHE)) && printf %s \"-XX:AOTCache=Server/HytaleServer.aot\" ) -Xms128M -Xmx$(({{SERVER_MEMORY}}*{{MAXIMUM_RAM}}/100))M {{JVM_FLAGS}} -jar Server/HytaleServer.jar $( ((HYTALE_ALLOW_OP)) && printf %s \"--allow-op\" ) $( ((HYTALE_ACCEPT_EARLY_PLUGINS)) && printf %s \"--accept-early-plugins\" ) $( ((DISABLE_SENTRY)) && printf %s \"--disable-sentry\" ) --auth-mode {{HYTALE_AUTH_MODE}} --assets Assets.zip --bind 0.0.0.0:{{SERVER_PORT}}",
@@ -117,7 +117,7 @@
             "name": "CDN URL",
             "description": "Hytale CDN URL for downloading server files.",
             "env_variable": "CDN_URL",
-            "default_value": "https://ht-cdn.lagless.gg",
+            "default_value": "https://api.nodezy.gg",
             "user_viewable": false,
             "user_editable": false,
             "rules": "required|string|max:255",
