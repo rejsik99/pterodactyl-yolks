@@ -47,8 +47,10 @@ download_file() {
     # Get total file size in bytes
     TOTAL_BYTES=$(curl -k -sI "$url" | grep -i Content-Length | awk '{print $2}' | tr -d '\r')
 
-    # Download with pv progress bar
-    curl -k -L -s "$url" | pv -p -t -e -b -s "$TOTAL_BYTES" > "${target_path}.tmp"
+    echo "Downloading $(basename "$target_path")..."
+
+    # Stream download through pv
+    curl -k -L "$url" | pv -p -t -e -b -s "$TOTAL_BYTES" > "${target_path}.tmp"
 
     # Verify SHA256
     DOWNLOADED_SHA256=$(sha256sum "${target_path}.tmp" | awk '{print $1}')
