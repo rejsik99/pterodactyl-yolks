@@ -44,7 +44,9 @@ download_file() {
         echo "$(basename "$target_path") not found, downloading"
     fi
 
-    echo "DO NOT RESTART SERVER, DOWNLOAD IS STILL IN PROGRESS"
+    RED='\033[0;31m'
+    NC='\033[0m'  # No Color / reset
+    echo -e "${RED}DO NOT RESTART SERVER, DOWNLOAD IS STILL IN PROGRESS${NC}"
     # Add -k to ignore SSL verification
     curl -k -# -L -f "$url" --progress-bar -o "${target_path}.tmp"
 
