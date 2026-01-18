@@ -2,7 +2,7 @@ FROM --platform=$TARGETOS/$TARGETARCH eclipse-temurin:25-jdk
 
 LABEL author="Alex Chatham" maintainer="info@blstmo.com"
 
-LABEL org.opencontainers.image.source="https://github.com/blstmo/pterodactyl-yolks"
+LABEL org.opencontainers.image.source="https://github.com/rejsik99/pterodactyl-yolks"
 LABEL org.opencontainers.image.licenses=MIT
 
 RUN apt-get update -y \
