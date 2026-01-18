@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Hytale Server Entrypoint (no SHA256 verification)
+# Hytale Server Entrypoint
 
 TZ=${TZ:-UTC}
 export TZ
