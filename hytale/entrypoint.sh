@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Hytale Server Entrypoint
 
@@ -15,6 +16,7 @@ SERVER_PORT=${SERVER_PORT:-"5520"}
 MAXIMUM_RAM=${MAXIMUM_RAM:-"90"}
 JVM_FLAGS=${JVM_FLAGS:-""}
 CDN_URL=${CDN_URL:-"https://api.nodezy.gg"}
+MANIFEST_URL="$CDN_URL/hytale/manifest.json"
 HYTALE_PATCHLINE=${HYTALE_PATCHLINE:-"release"}
 USE_AOT_CACHE=${USE_AOT_CACHE:-"0"}
 HYTALE_ALLOW_OP=${HYTALE_ALLOW_OP:-"0"}
@@ -25,43 +27,75 @@ DISABLE_SENTRY=${DISABLE_SENTRY:-"0"}
 # Create Server directory if it doesn't exist
 mkdir -p Server
 
-# Function to download file (no verification)
+# Function to download file with SHA256 verification
 download_file() {
-    local filename=$1
-    local target_path=$2
+    local url="$1"
+    local target_path="$2"
+    local expected_sha256="$3"
 
-    echo "Downloading $filename..."
-    if ! curl -# -L -f "$CDN_URL/hytale/latest/$filename" -o "${target_path}.tmp"; then
-        echo "ERROR: Failed to download $filename"
+    if [ -f "$target_path" ]; then
+        CURRENT_SHA256=$(sha256sum "$target_path" | awk '{print $1}')
+        if [ "$CURRENT_SHA256" = "$expected_sha256" ]; then
+            echo "$(basename "$target_path") is up to date"
+            return 0
+        fi
+        echo "$(basename "$target_path") changed, re-downloading"
+    else
+        echo "$(basename "$target_path") not found, downloading"
+    fi
+
+    curl -# -L -f "$url" -o "${target_path}.tmp"
+
+    DOWNLOADED_SHA256=$(sha256sum "${target_path}.tmp" | awk '{print $1}')
+    if [ "$DOWNLOADED_SHA256" != "$expected_sha256" ]; then
+        echo "ERROR: SHA256 mismatch for $(basename "$target_path")"
         rm -f "${target_path}.tmp"
-        return 1
+        exit 1
     fi
 
     mv "${target_path}.tmp" "$target_path"
-    return 0
 }
 
-echo "Downloading server files..."
+# Fetch manifest
+echo "Fetching manifest..."
+curl -sSL -f "$MANIFEST_URL" -o manifest.json
+
+LATEST_VERSION=$(jq -r '.latest_version' manifest.json)
+VERSION_OBJ=$(jq -r '.versions[] | select(.version == "'$LATEST_VERSION'")' manifest.json)
+DOWNLOAD_BASE=$(echo "$VERSION_OBJ" | jq -r '.download_url_base')
+
+get_sha() {
+    echo "$VERSION_OBJ" | jq -r '.files[] | select(.filename == "'$1'") | .sha256'
+}
+
+echo "Latest version: $LATEST_VERSION"
+echo ""
 
 # Download HytaleServer.jar
-if ! download_file "Server/HytaleServer.jar" "Server/HytaleServer.jar"; then
-    echo "ERROR: Failed to download HytaleServer.jar"
-    exit 1
-fi
+download_file \
+  "$DOWNLOAD_BASE/Server/HytaleServer.jar" \
+  "Server/HytaleServer.jar" \
+  "$(get_sha HytaleServer.jar)"
 echo ""
 
 # Download HytaleServer.aot (optional)
 if [ "$USE_AOT_CACHE" = "1" ]; then
-    download_file "Server/HytaleServer.aot" "Server/HytaleServer.aot"
+    download_file \
+      "$DOWNLOAD_BASE/Server/HytaleServer.aot" \
+      "Server/HytaleServer.aot" \
+      "$(get_sha HytaleServer.aot)"
     echo ""
 fi
 
 # Download Assets.zip
-if ! download_file "Assets.zip" "Assets.zip"; then
-    echo "ERROR: Failed to download Assets.zip"
-    exit 1
-fi
+download_file \
+  "$DOWNLOAD_BASE/Assets.zip" \
+  "Assets.zip" \
+  "$(get_sha Assets.zip)"
 echo ""
+
+# Clean up manifest
+rm -f manifest.json
 
 # Verify server jar exists
 if [ ! -f "Server/HytaleServer.jar" ]; then
