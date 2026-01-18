@@ -44,13 +44,9 @@ download_file() {
         echo "$(basename "$target_path") not found, downloading"
     fi
 
-    # Get total file size in bytes
-    TOTAL_BYTES=$(curl -k -sI "$url" | grep -i Content-Length | awk '{print $2}' | tr -d '\r')
-
-    echo "Downloading $(basename "$target_path")..."
-
-    # Stream download through pv
-    curl -k -L "$url" | pv -p -t -e -b -s "$TOTAL_BYTES" > "${target_path}.tmp"
+    echo "DO NOT RESTART SERVER, FILES ARE STILL DOWNLOADING"
+    # Add -k to ignore SSL verification
+    curl -k -# -L -f "$url" --progress-bar -o "${target_path}.tmp"
 
     # Verify SHA256
     DOWNLOADED_SHA256=$(sha256sum "${target_path}.tmp" | awk '{print $1}')
@@ -61,10 +57,8 @@ download_file() {
     fi
 
     mv "${target_path}.tmp" "$target_path"
-    echo ""
+    
 }
-
-
 
 
 # Fetch manifest
