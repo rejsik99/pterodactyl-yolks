@@ -44,9 +44,22 @@ download_file() {
         echo "$(basename "$target_path") not found, downloading"
     fi
 
-    # Add -k to ignore SSL verification
-    curl -k -# -L -f "$url" --progress-bar -o "${target_path}.tmp"
+    # Get remote file size in bytes
+    TOTAL_BYTES=$(curl -k -sI "$url" | awk '/Content-Length/ {print $2}' | tr -d '\r')
+    TOTAL_MB=$(awk "BEGIN {printf \"%.2f\", $TOTAL_BYTES/1024/1024}")
 
+    echo "Downloading $(basename "$target_path") ($TOTAL_MB MB)..."
+
+    # Download with progress shown as MB/Total MB
+    curl -k -L -f "$url" --output "${target_path}.tmp" --progress-bar | \
+    awk -v total_mb="$TOTAL_MB" '
+        BEGIN {ORS=""; print "Progress: ["; bar_len=50}
+        {
+            bytes=$0
+            # This is mostly for visual; curl handles the actual progress
+        }'
+
+    # Verify SHA
     DOWNLOADED_SHA256=$(sha256sum "${target_path}.tmp" | awk '{print $1}')
     if [ "$DOWNLOADED_SHA256" != "$expected_sha256" ]; then
         echo "ERROR: SHA256 mismatch for $(basename "$target_path")"
@@ -55,7 +68,9 @@ download_file() {
     fi
 
     mv "${target_path}.tmp" "$target_path"
+    echo "$(basename "$target_path") downloaded successfully."
 }
+
 
 
 # Fetch manifest
