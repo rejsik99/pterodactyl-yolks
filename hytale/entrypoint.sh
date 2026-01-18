@@ -44,7 +44,7 @@ download_file() {
 echo "Downloading server files..."
 
 # Download HytaleServer.jar
-if ! download_file "HytaleServer.jar" "Server/HytaleServer.jar"; then
+if ! download_file "Server/HytaleServer.jar" "Server/HytaleServer.jar"; then
     echo "ERROR: Failed to download HytaleServer.jar"
     exit 1
 fi
@@ -52,7 +52,7 @@ echo ""
 
 # Download HytaleServer.aot (optional)
 if [ "$USE_AOT_CACHE" = "1" ]; then
-    download_file "HytaleServer.aot" "Server/HytaleServer.aot"
+    download_file "Server/HytaleServer.aot" "Server/HytaleServer.aot"
     echo ""
 fi
 
