@@ -45,7 +45,7 @@ download_file() {
     fi
 
     # Add -k to ignore SSL verification
-    curl -k -# -L -f "$url" -o "${target_path}.tmp"
+    curl -k -# -L -f "$url" --progress-bar -o "${target_path}.tmp"
 
     DOWNLOADED_SHA256=$(sha256sum "${target_path}.tmp" | awk '{print $1}')
     if [ "$DOWNLOADED_SHA256" != "$expected_sha256" ]; then
