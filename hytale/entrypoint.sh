@@ -44,7 +44,7 @@ download_file() {
         echo "$(basename "$target_path") not found, downloading"
     fi
 
-    echo "DO NOT RESTART SERVER, FILES ARE STILL DOWNLOADING"
+    echo "DO NOT RESTART SERVER, DOWNLOAD IS STILL IN PROGRESS"
     # Add -k to ignore SSL verification
     curl -k -# -L -f "$url" --progress-bar -o "${target_path}.tmp"
 
